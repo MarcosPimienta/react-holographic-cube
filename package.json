@@ -1,6 +1,6 @@
 {
   "name": "react-holographic-cube",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A 3D holographic spinning cube component for React",
   "source": "src/index.js",
   "main": "dist/index.js",
