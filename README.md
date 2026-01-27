@@ -28,7 +28,7 @@ import React from "react";
 import InfiniteCube from "react-holographic-cube";
 
 // 1. IMPORT THE CSS
-import "react-holographic-cube/dist/styles.css";
+import "react-holographic-cube/dist/index.css";
 
 const App = () => {
   // Define the items to show on the faces

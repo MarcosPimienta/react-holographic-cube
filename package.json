@@ -5,7 +5,7 @@
   "source": "src/index.js",
   "main": "dist/index.js",
   "module": "dist/index.module.js",
-  "style": "dist/styles.css",
+  "style": "dist/index.css",
   "scripts": {
     "build": "microbundle",
     "watch": "microbundle watch"
