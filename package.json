@@ -1,15 +1,15 @@
 {
   "name": "react-holographic-cube",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A 3D holographic spinning cube component for React",
   "source": "src/index.js",
   "main": "dist/index.js",
   "module": "dist/index.module.js",
   "style": "dist/index.css",
   "scripts": {
-  "build": "microbundle --jsx React.createElement --jsxFragment React.Fragment",
-  "watch": "microbundle watch --jsx React.createElement --jsxFragment React.Fragment"
-},
+    "build": "microbundle --jsx React.createElement --jsxFragment React.Fragment",
+    "watch": "microbundle watch --jsx React.createElement --jsxFragment React.Fragment"
+  },
   "peerDependencies": {
     "react": ">=16",
     "react-dom": ">=16"
