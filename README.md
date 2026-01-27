@@ -3,7 +3,6 @@
 A high-performance, cyberpunk-styled 3D spinning cube for React. Features physics-based friction, holographic visuals, and a floating drift animation when idle.
 
 ![Holographic Cube Preview](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTVyamF6bjlsYjB5ZmdmbnlrY2RpNGtsYm9oZW0zNGN4eDZ1YmZmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IWt8NLETm6OLAnHE8C/giphy.gif)
-_(Note: You can replace this link with a screenshot of your actual cube later)_
 
 ## Features
 
@@ -16,6 +15,7 @@ _(Note: You can replace this link with a screenshot of your actual cube later)_
 ## Installation
 
 ```bash
+npm create vite@latest . -- --template react
 npm install react-holographic-cube
 ```
 
