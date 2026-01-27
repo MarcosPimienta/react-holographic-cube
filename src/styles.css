@@ -1,0 +1,245 @@
+/* =========================================
+   1. The 3D Scene & Environment
+   ========================================= */
+
+/* The stage that holds the 3D world */
+.scene {
+  width: 200px;
+  height: 200px;
+  perspective: 1000px; /* Controls the 3D depth */
+  margin: 0 auto;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* The Background Light Pillar (Hologram Beam) */
+.light-pillar {
+  position: absolute;
+  width: 120px;
+  height: 2000px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translateZ(-250px);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 247, 255, 0.0) 20%,
+    rgba(0, 247, 255, 0.1) 50%,
+    rgba(0, 247, 255, 0.0) 80%,
+    transparent 100%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* The Infinite Grid Floor */
+.hi-tech-floor {
+  position: absolute;
+  width: 4000px;
+  height: 4000px;
+  background-color: transparent;
+  left: 50%;
+  top: 50%;
+  /* Rotate flat and push down below the cube */
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(-130px);
+
+  /* Radial fade to black + Cyan Grid */
+  background-image: 
+    radial-gradient(circle at center, transparent 0%, #050510 60%),
+    linear-gradient(rgba(0, 247, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 247, 255, 0.3) 1px, transparent 1px);
+
+  background-size: 100% 100%, 60px 60px, 60px 60px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The Shadow underneath the floating cube */
+.cube-shadow {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  background: rgba(0, 247, 255, 0.2);
+  box-shadow: 0 0 50px rgba(0, 247, 255, 0.5);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(-128px);
+  filter: blur(15px);
+  z-index: 2;
+}
+
+/* =========================================
+   2. The Cube & Wrapper
+   ========================================= */
+
+/* The Wrapper handles the "Idle Drift" (Floating).
+   It transitions slowly (4s) between random positions.
+*/
+.cube-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 4s ease-in-out; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* When spinning, we lock the wrapper to the center 
+   so the physics spin aligns perfectly.
+*/
+.cube-wrapper.locked {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0) !important;
+}
+
+/* The Inner Cube (Handles the fast vertical spin) */
+.cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  z-index: 10;
+  
+  /* CRITICAL: No CSS transition allowed here. 
+     The JS loop handles the rotation frame-by-frame. */
+  transition: none; 
+  will-change: transform;
+}
+
+/* =========================================
+   3. The Faces (Holographic Style)
+   ========================================= */
+
+.face {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+
+  /* Glassy Transparency */
+  background: rgba(0, 20, 40, 0.6);
+  backdrop-filter: blur(8px);
+
+  /* Neon Green Border */
+  border: 2px solid #00db46;
+  border-radius: 1.25rem;
+
+  /* Inner and Outer Glow */
+  box-shadow: 
+    0 0 15px rgba(0, 247, 255, 0.3),
+    inset 0 0 30px rgba(0, 247, 255, 0.1);
+
+  /* Content Styling */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  text-shadow: 0 0 20px rgba(0, 219, 70, 0.95);
+
+  /* Optimization */
+  backface-visibility: hidden;
+  user-select: none;
+}
+
+/* Face Positions */
+.front  { transform: rotateX(0deg) translateZ(100px); }
+.bottom { transform: rotateX(-90deg) translateZ(100px); }
+.back   { transform: rotateX(-180deg) translateZ(100px); }
+.top    { transform: rotateX(-270deg) translateZ(100px); }
+
+/* The Side Caps (Closing the cube) */
+.left   { transform: rotateY(-90deg) translateZ(100px); }
+.right  { transform: rotateY(90deg) translateZ(100px); }
+
+/* =========================================
+   4. High Energy Spin Effects
+   ========================================= */
+
+/* When the cube is spinning, supercharge the glow */
+.cube.is-spinning .face {
+  border-color: #afffd3; /* White-hot green */
+  box-shadow: 
+    0 0 40px rgba(0, 219, 70, 0.6),
+    inset 0 0 60px rgba(0, 219, 70, 0.4);
+  animation: energyPulse 0.1s infinite alternate;
+}
+
+@keyframes energyPulse {
+  0% {
+    box-shadow: 
+      0 0 30px rgba(0, 219, 70, 0.5),
+      inset 0 0 40px rgba(0, 219, 70, 0.3);
+  }
+  100% {
+    box-shadow: 
+      0 0 60px rgba(0, 219, 70, 1),
+      inset 0 0 70px rgba(0, 219, 70, 0.6);
+    background: rgba(0, 219, 70, 0.2);
+  }
+}
+
+/* =========================================
+   5. UI Controls
+   ========================================= */
+
+.controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.winner-text {
+  margin-top: 4rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(0, 219, 70, 0.95);
+  min-height: 50px;
+  letter-spacing: 1px;
+}
+
+/* Cyberpunk Button Styles */
+.cyber-button {
+  background: transparent;
+  border: 2px solid #00db46;
+  color: #00db46;
+  padding: 12px 36px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.cyber-button:hover:not(:disabled) {
+  background: #00db46;
+  color: #000;
+  box-shadow: 0 0 25px rgba(0, 219, 70, 0.8);
+}
+
+.cyber-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #555;
+  color: #555;
+  box-shadow: none;
+}
+
+/* Stop Button Variation */
+.stop-btn {
+  border-color: #7f63f5;
+  color: #7f63f5;
+  box-shadow: 0 0 10px rgba(127, 99, 245, 0.5);
+}
+
+.stop-btn:hover:not(:disabled) {
+  background: #7f63f5;
+  color: #fff;
+  box-shadow: 0 0 25px rgba(127, 99, 245, 0.8);
+}
