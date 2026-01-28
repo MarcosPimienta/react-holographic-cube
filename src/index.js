@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./styles.css";
 
-// Default items if user provides none
 const DEMO_ITEMS = [
   { content: "1", color: "#00f7ff" },
   { content: "2", color: "#00db46" },
@@ -13,11 +12,17 @@ const InfiniteCube = ({
   items = DEMO_ITEMS,
   onWinner,
   perspective = "1000px",
-  initialSpeed = 30, // How fast it starts spinning
-  friction = 0.98, // 0.99 = long spin, 0.90 = short spin
-  showResult = true, // Show/Hide the text below
-  resultStyle = {}, // Custom styles for the result text
-  cubeStyle = {}, // Override the generic cube face style
+  initialSpeed = 30,
+  friction = 0.98,
+  showResult = true,
+  resultStyle = {},
+  cubeStyle = {},
+
+  // --- NEW PROPS ---
+  showPillar = true,
+  pillarColor = "rgba(0, 247, 255, 0.1)", // Default cyan tint
+  pillarSize = { width: "120px", height: "2000px" }, // Default massive beam
+  rootStyle = {}, // Allows user to set background image here
 }) => {
   const [status, setStatus] = useState("idle");
   const [winner, setWinner] = useState(null);
@@ -37,16 +42,14 @@ const InfiniteCube = ({
 
   const MIN_CRAWL_SPEED = 0.5;
 
-  // --- Helper: Normalize Item Data ---
-  // Ensures we handle both ["A", "B"] and [{content:"A"}, {content:"B"}]
   const getItemData = (index) => {
     const rawItem = items[index % items.length];
     if (typeof rawItem === "string") {
-      return { content: rawItem, color: "#00db46" }; // Default neon green
+      return { content: rawItem, color: "#00db46" };
     }
     return {
       content: rawItem.content,
-      color: rawItem.color || "#00db46", // Fallback color
+      color: rawItem.color || "#00db46",
     };
   };
 
@@ -58,7 +61,6 @@ const InfiniteCube = ({
     updateFaceContent(0);
   }, [items]);
 
-  // --- Random Float Logic ---
   useEffect(() => {
     let timeoutId;
     const floatRandomly = () => {
@@ -93,10 +95,7 @@ const InfiniteCube = ({
     setWinner(null);
     setStatus("spinning");
     statusRef.current = "spinning";
-
-    // Use the prop for speed
     speedRef.current = initialSpeed;
-
     listPointerRef.current = 0;
     rotationRef.current = 0;
     updateFaceContent(0);
@@ -113,7 +112,6 @@ const InfiniteCube = ({
   const loop = () => {
     rotationRef.current += speedRef.current;
 
-    // Treadmill Logic
     if (rotationRef.current >= 90) {
       rotationRef.current %= 90;
       listPointerRef.current = (listPointerRef.current + 1) % items.length;
@@ -124,11 +122,8 @@ const InfiniteCube = ({
       cubeRef.current.style.transform = `rotateX(${rotationRef.current}deg)`;
     }
 
-    // Physics
     if (statusRef.current === "stopping") {
-      // Use the prop for friction
       speedRef.current *= friction;
-
       if (speedRef.current < MIN_CRAWL_SPEED)
         speedRef.current = MIN_CRAWL_SPEED;
 
@@ -148,11 +143,8 @@ const InfiniteCube = ({
 
       if (el) {
         el.innerText = data.content;
-
-        // DYNAMIC STYLING
-        // We inject the color directly into the CSS variables or styles
         el.style.borderColor = data.color;
-        el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`; // Hex alpha hacks
+        el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`;
         el.style.textShadow = `0 0 20px ${data.color}`;
       }
     }
@@ -160,13 +152,10 @@ const InfiniteCube = ({
 
   const finishGame = () => {
     if (cubeRef.current) cubeRef.current.style.transform = `rotateX(0deg)`;
-
     const winningData = getItemData(listPointerRef.current);
-
     setStatus("idle");
     statusRef.current = "idle";
     setWinner(winningData.content);
-
     if (onWinner) onWinner(winningData.content);
   };
 
@@ -176,14 +165,26 @@ const InfiniteCube = ({
         position: "relative",
         zIndex: 10,
         width: "100%",
+        height: "100%" /* Ensure it fills parent */,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center" /* Vertically center content */,
+        ...rootStyle,
       }}
     >
       <div className="scene" style={{ perspective }}>
-        {/* Optional: You can pass a prop to hide this pillar too if desired */}
-        <div className="light-pillar"></div>
+        {/* Configurable Light Pillar */}
+        {showPillar && (
+          <div
+            className="light-pillar"
+            style={{
+              width: pillarSize.width,
+              height: pillarSize.height,
+              background: `linear-gradient(to bottom, transparent 0%, ${pillarColor} 50%, transparent 100%)`,
+            }}
+          ></div>
+        )}
 
         <div
           className={`cube-wrapper ${status !== "idle" ? "locked" : ""}`}
@@ -194,50 +195,53 @@ const InfiniteCube = ({
             className={`cube ${status !== "idle" ? "is-spinning" : ""}`}
             style={{ transition: "none" }}
           >
-            {/* The 4 active faces */}
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
                 className={`face ${["front", "bottom", "back", "top"][i]}`}
                 ref={(el) => (faceRefs.current[i] = el)}
-                style={cubeStyle} // Apply user overrides
+                style={cubeStyle}
               ></div>
             ))}
-
-            {/* Caps */}
             <div className="face left" style={cubeStyle}></div>
             <div className="face right" style={cubeStyle}></div>
           </div>
         </div>
 
         <div className="cube-shadow"></div>
-        <div className="hi-tech-floor"></div>
       </div>
 
-      {showResult && (
-        <div
-          className="winner-text"
-          style={{ marginTop: "4rem", minHeight: "50px", ...resultStyle }}
-        >
-          {winner ? `Result: ${winner}` : "..."}
-        </div>
-      )}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10%",
+          width: "100%",
+          textAlign: "center",
+          zIndex: 30,
+        }}
+      >
+        {showResult && (
+          <div className="winner-text" style={resultStyle}>
+            {winner ? `Result: ${winner}` : "..."}
+          </div>
+        )}
 
-      <div className="controls" style={{ marginTop: 20 }}>
-        <button
-          className="cyber-button"
-          onClick={handleStart}
-          disabled={status !== "idle"}
-        >
-          Spin
-        </button>
-        <button
-          className="cyber-button stop-btn"
-          onClick={handleStop}
-          disabled={status !== "spinning"}
-        >
-          Stop
-        </button>
+        <div className="controls">
+          <button
+            className="cyber-button"
+            onClick={handleStart}
+            disabled={status !== "idle"}
+          >
+            Spin
+          </button>
+          <button
+            className="cyber-button stop-btn"
+            onClick={handleStop}
+            disabled={status !== "spinning"}
+          >
+            Stop
+          </button>
+        </div>
       </div>
     </div>
   );
