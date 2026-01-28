@@ -158,6 +158,20 @@ const InfiniteCube = (props) => {
     animationRef.current = requestAnimationFrame(loop);
   };
 
+  // Helper to convert hex to rgb string for CSS vars
+  const hexToRgb = (hex) => {
+    let c;
+    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+      c = hex.substring(1).split("");
+      if (c.length === 3) {
+        c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+      }
+      c = "0x" + c.join("");
+      return [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(",");
+    }
+    return "0, 219, 70"; // default fallback
+  };
+
   const updateFaceContent = (startIndex) => {
     for (let i = 0; i < 4; i++) {
       const itemIndex = (startIndex + i) % activeItems.length;
@@ -165,9 +179,16 @@ const InfiniteCube = (props) => {
       const el = faceRefs.current[i];
       if (el) {
         el.innerText = data.content;
+
+        // standard static styles
         el.style.borderColor = data.color;
         el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`;
         el.style.textShadow = `0 0 20px ${data.color}`;
+
+        // CSS variable for the spinning animation
+        const rgb = hexToRgb(data.color);
+        el.style.setProperty("--face-color-rgb", rgb);
+        el.style.setProperty("--face-color", data.color);
       }
     }
   };

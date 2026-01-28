@@ -97,6 +97,8 @@
   text-shadow: 0 0 20px rgba(0, 219, 70, 0.95);
   backface-visibility: hidden;
   user-select: none;
+  --face-color: #00db46;
+  --face-color-rgb: 0, 219, 70;
 }
 
 .front  { transform: rotateX(0deg) translateZ(100px); }
@@ -107,14 +109,14 @@
 .right  { transform: rotateY(90deg) translateZ(100px); }
 
 .cube.is-spinning .face {
-  border-color: #afffd3;
-  box-shadow: 0 0 40px rgba(0, 219, 70, 0.6), inset 0 0 60px rgba(0, 219, 70, 0.4);
+  border-color: var(--face-color);
+  box-shadow: 0 0 40px rgba(var(--face-color-rgb), 0.6), inset 0 0 60px rgba(var(--face-color-rgb), 0.4);
   animation: energyPulse 0.1s infinite alternate;
 }
 
 @keyframes energyPulse {
-  0% { box-shadow: 0 0 30px rgba(0, 219, 70, 0.5), inset 0 0 40px rgba(0, 219, 70, 0.3); }
-  100% { box-shadow: 0 0 60px rgba(0, 219, 70, 1), inset 0 0 70px rgba(0, 219, 70, 0.6); background: rgba(0, 219, 70, 0.2); }
+  0% { box-shadow: 0 0 30px rgba(var(--face-color-rgb), 0.5), inset 0 0 40px rgba(var(--face-color-rgb), 0.3); }
+  100% { box-shadow: 0 0 60px rgba(var(--face-color-rgb), 1), inset 0 0 70px rgba(var(--face-color-rgb), 0.6); background: rgba(var(--face-color-rgb), 0.2); }
 }
 
 /* =========================================
