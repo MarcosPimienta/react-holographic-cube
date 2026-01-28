@@ -4,7 +4,7 @@ A high-performance, cyberpunk-styled 3D spinning cube for React. Features physic
 
 Now supports **dynamic colors per item**, custom physics, full style overrides, and configurable environments!
 
-![Holographic Cube Preview](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTVyamF6bjlsYjB5ZmdmbnlrY2RpNGtsYm9oZW0zNGN4eDZ1YmZmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IWt8NLETm6OLAnHE8C/giphy.gif)
+![Holographic Cube Preview](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGJhc2M4YjV4MmkxeG1idWN1b3V3dXZjYW9zMWc2cGlzZmRoc2dxbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6HmdIqqc4ZGaKovwYN/giphy.gif)
 
 ## Features
 
