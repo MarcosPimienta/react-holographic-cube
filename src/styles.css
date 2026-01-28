@@ -302,3 +302,34 @@
 .rhc-action-btn:hover {
   background: #333;
 }
+
+/* =========================================
+   6. Toggle Button (New Feature)
+   ========================================= */
+
+.rhc-panel-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 200;
+  background: rgba(17, 17, 22, 0.8);
+  border: 1px solid #00f7ff;
+  color: #00f7ff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.rhc-panel-toggle:hover {
+  background: #00f7ff;
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 247, 255, 0.5);
+  transform: rotate(90deg);
+}

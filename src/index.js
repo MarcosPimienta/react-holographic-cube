@@ -26,7 +26,10 @@ const InfiniteCube = (props) => {
     showResult: props.showResult !== false, // default true
     cubeBorderWidth: 2,
     bgImage: null,
+    pillarWidth: "120px",
   });
+
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
 
   // Decide which source of truth to use
   const activeItems = enablePanel
@@ -44,9 +47,13 @@ const InfiniteCube = (props) => {
   const activeShowPillar = enablePanel
     ? internalConfig.showPillar
     : props.showPillar !== false;
+
   const activePillarColor = enablePanel
     ? internalConfig.pillarColor
     : props.pillarColor || "rgba(0, 247, 255, 0.1)";
+  const activePillarWidth = enablePanel
+    ? internalConfig.pillarWidth
+    : props.pillarSize?.width || "120px";
   const activeShowResult = enablePanel
     ? internalConfig.showResult
     : props.showResult !== false;
@@ -209,7 +216,7 @@ const InfiniteCube = (props) => {
             <div
               className="light-pillar"
               style={{
-                width: props.pillarSize?.width || "120px",
+                width: activePillarWidth,
                 height: props.pillarSize?.height || "2000px",
                 background: `linear-gradient(to bottom, transparent 0%, ${activePillarColor} 50%, transparent 100%)`,
               }}
@@ -265,8 +272,19 @@ const InfiniteCube = (props) => {
         </div>
       </div>
 
-      {/* 2. THE SIDEBAR (Only if enabled) */}
+      {/* 2.5 TOGGLE BUTTON (Only if panel is enabled) */}
       {enablePanel && (
+        <button
+          className="rhc-panel-toggle"
+          onClick={() => setIsPanelOpen(!isPanelOpen)}
+          title={isPanelOpen ? "Hide Panel" : "Show Panel"}
+        >
+          {isPanelOpen ? "×" : "⚙"}
+        </button>
+      )}
+
+      {/* 2. THE SIDEBAR (Only if enabled AND open) */}
+      {enablePanel && isPanelOpen && (
         <div className="rhc-sidebar">
           <section>
             <h2>Environment</h2>
@@ -293,12 +311,26 @@ const InfiniteCube = (props) => {
                   }
                 />
               </div>
+
               <div className="rhc-row">
                 <label>Show Pillar</label>
                 <input
                   type="checkbox"
                   checked={internalConfig.showPillar}
                   onChange={(e) => updateConfig("showPillar", e.target.checked)}
+                />
+              </div>
+              <div className="rhc-row">
+                <label>Pillar Width</label>
+                <input
+                  type="range"
+                  min="10"
+                  max="500"
+                  step="10"
+                  value={parseInt(internalConfig.pillarWidth)}
+                  onChange={(e) =>
+                    updateConfig("pillarWidth", `${e.target.value}px`)
+                  }
                 />
               </div>
               <div className="rhc-row">

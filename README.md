@@ -28,57 +28,16 @@ npm install react-holographic-cube
 ```javascript
 import React from "react";
 import InfiniteCube from "react-holographic-cube";
-
-// 1. IMPORT THE CSS
 import "react-holographic-cube/dist/index.css";
 
-// 2. IMPORT YOUR BACKGROUND (Optional)
-import myBg from "./assets/space-bg.jpg";
-
-const App = () => {
-  const items = [
-    { content: "🔥", color: "#ff4d4d" }, // Red
-    { content: "💧", color: "#4d94ff" }, // Blue
-    { content: "🌿", color: "#4dff88" }, // Green
-    { content: "⚡", color: "#ffff4d" }, // Yellow
-  ];
-
-  const handleWin = (result) => {
-    console.log("The cube stopped on:", result);
-  };
-
+export default function App() {
   return (
-    // Parent container controls the size and background
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        backgroundImage: `url(${myBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        overflow: "hidden",
-      }}
-    >
-      <InfiniteCube
-        items={items}
-        onWinner={handleWin}
-        perspective="1000px"
-        // Physics
-        initialSpeed={45}
-        friction={0.99}
-        // Environment Controls
-        showPillar={true}
-        pillarColor="rgba(255, 0, 0, 0.3)" // Red beam
-        pillarSize={{ width: "100px", height: "800px" }}
-        // Visuals
-        showResult={true}
-        cubeStyle={{ borderWidth: "4px" }}
-      />
+    <div style={{ width: "100vw", height: "100vh" }}>
+      {/* Just flip this boolean to see the magic */}
+      <InfiniteCube enablePanel={true} />
     </div>
   );
-};
-
-export default App;
+}
 ```
 
 ## Props
