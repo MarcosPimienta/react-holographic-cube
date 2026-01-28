@@ -89,7 +89,11 @@ const InfiniteCube = (props) => {
     const rawItem = activeItems[index % activeItems.length];
     if (typeof rawItem === "string")
       return { content: rawItem, color: "#00db46" };
-    return { content: rawItem.content, color: rawItem.color || "#00db46" };
+    return {
+      content: rawItem.content,
+      color: rawItem.color || "#00db46",
+      image: rawItem.image,
+    };
   };
 
   useEffect(() => {
@@ -178,12 +182,21 @@ const InfiniteCube = (props) => {
       const data = getItemData(itemIndex);
       const el = faceRefs.current[i];
       if (el) {
-        el.innerText = data.content;
+        if (data.image) {
+          el.innerText = "";
+          el.style.backgroundImage = `url(${data.image})`;
+          el.style.backgroundSize = "cover";
+          el.style.backgroundPosition = "center";
+          el.style.textShadow = "none";
+        } else {
+          el.innerText = data.content;
+          el.style.backgroundImage = "none";
+          el.style.textShadow = `0 0 20px ${data.color}`;
+        }
 
         // standard static styles
         el.style.borderColor = data.color;
         el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`;
-        el.style.textShadow = `0 0 20px ${data.color}`;
 
         // CSS variable for the spinning animation
         const rgb = hexToRgb(data.color);
@@ -215,6 +228,13 @@ const InfiniteCube = (props) => {
     const newItems = [...internalConfig.items];
     newItems[idx] = { ...newItems[idx], [field]: val };
     updateConfig("items", newItems);
+  };
+
+  const handleItemImageUpload = (idx, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleItemEdit(idx, "image", URL.createObjectURL(file));
+    }
   };
 
   const addItem = () =>
@@ -293,15 +313,21 @@ const InfiniteCube = (props) => {
         </div>
       </div>
 
-      {/* 2.5 TOGGLE BUTTON (Only if panel is enabled) */}
+      {/* 2.5 TOGGLE SWITCH (Only if panel is enabled) */}
       {enablePanel && (
-        <button
-          className="rhc-panel-toggle"
-          onClick={() => setIsPanelOpen(!isPanelOpen)}
-          title={isPanelOpen ? "Hide Panel" : "Show Panel"}
-        >
-          {isPanelOpen ? "×" : "⚙"}
-        </button>
+        <div className="rhc-toggle-wrapper">
+          <span className="rhc-toggle-label">
+            {isPanelOpen ? "Hide" : "Edit"}
+          </span>
+          <label className="rhc-switch">
+            <input
+              type="checkbox"
+              checked={isPanelOpen}
+              onChange={(e) => setIsPanelOpen(e.target.checked)}
+            />
+            <span className="rhc-slider"></span>
+          </label>
+        </div>
       )}
 
       {/* 2. THE SIDEBAR (Only if enabled AND open) */}
@@ -419,14 +445,42 @@ const InfiniteCube = (props) => {
             <div className="rhc-control-group">
               {internalConfig.items.map((item, idx) => (
                 <div key={idx} className="rhc-item-row">
+                  {item.image ? (
+                    <div
+                      className="rhc-item-preview"
+                      style={{ backgroundImage: `url(${item.image})` }}
+                      onClick={() =>
+                        document.getElementById(`item-upload-${idx}`).click()
+                      }
+                      title="Click to change image"
+                    ></div>
+                  ) : (
+                    <button
+                      className="rhc-mini-btn"
+                      onClick={() =>
+                        document.getElementById(`item-upload-${idx}`).click()
+                      }
+                    >
+                      IMG
+                    </button>
+                  )}
+                  <input
+                    id={`item-upload-${idx}`}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleItemImageUpload(idx, e)}
+                  />
+
                   <input
                     type="text"
                     value={item.content}
+                    placeholder="Text"
                     maxLength={4}
                     onChange={(e) =>
                       handleItemEdit(idx, "content", e.target.value)
                     }
-                    style={{ width: "60px", textAlign: "center" }}
+                    style={{ width: "50px", textAlign: "center" }}
                   />
                   <input
                     type="color"
