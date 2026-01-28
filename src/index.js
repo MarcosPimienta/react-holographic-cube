@@ -18,7 +18,7 @@ const InfiniteCube = ({
   resultStyle = {},
   cubeStyle = {},
 
-  // --- NEW PROPS ---
+  // --- ENVIRONMENT PROPS ---
   showPillar = true,
   pillarColor = "rgba(0, 247, 255, 0.1)", // Default cyan tint
   pillarSize = { width: "120px", height: "2000px" }, // Default massive beam
@@ -42,6 +42,7 @@ const InfiniteCube = ({
 
   const MIN_CRAWL_SPEED = 0.5;
 
+  // --- Helper: Normalize Item Data ---
   const getItemData = (index) => {
     const rawItem = items[index % items.length];
     if (typeof rawItem === "string") {
@@ -61,6 +62,7 @@ const InfiniteCube = ({
     updateFaceContent(0);
   }, [items]);
 
+  // --- Random Float Logic (Drift) ---
   useEffect(() => {
     let timeoutId;
     const floatRandomly = () => {
@@ -112,6 +114,7 @@ const InfiniteCube = ({
   const loop = () => {
     rotationRef.current += speedRef.current;
 
+    // Treadmill Logic: Keep rotation between 0-90 visually, but swap content
     if (rotationRef.current >= 90) {
       rotationRef.current %= 90;
       listPointerRef.current = (listPointerRef.current + 1) % items.length;
@@ -122,11 +125,13 @@ const InfiniteCube = ({
       cubeRef.current.style.transform = `rotateX(${rotationRef.current}deg)`;
     }
 
+    // Physics Engine
     if (statusRef.current === "stopping") {
       speedRef.current *= friction;
       if (speedRef.current < MIN_CRAWL_SPEED)
         speedRef.current = MIN_CRAWL_SPEED;
 
+      // Snap to stop
       if (speedRef.current <= MIN_CRAWL_SPEED && rotationRef.current < 1.0) {
         finishGame();
         return;
@@ -143,6 +148,7 @@ const InfiniteCube = ({
 
       if (el) {
         el.innerText = data.content;
+        // Apply dynamic color from the item object
         el.style.borderColor = data.color;
         el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`;
         el.style.textShadow = `0 0 20px ${data.color}`;
@@ -165,11 +171,11 @@ const InfiniteCube = ({
         position: "relative",
         zIndex: 10,
         width: "100%",
-        height: "100%" /* Ensure it fills parent */,
+        height: "100%" /* Fills the parent container */,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center" /* Vertically center content */,
+        justifyContent: "center",
         ...rootStyle,
       }}
     >
@@ -186,15 +192,18 @@ const InfiniteCube = ({
           ></div>
         )}
 
+        {/* Floating Wrapper */}
         <div
           className={`cube-wrapper ${status !== "idle" ? "locked" : ""}`}
           style={status === "idle" ? driftStyle : {}}
         >
+          {/* Spinning Cube */}
           <div
             ref={cubeRef}
             className={`cube ${status !== "idle" ? "is-spinning" : ""}`}
             style={{ transition: "none" }}
           >
+            {/* The 4 active faces */}
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -203,6 +212,7 @@ const InfiniteCube = ({
                 style={cubeStyle}
               ></div>
             ))}
+            {/* The side caps */}
             <div className="face left" style={cubeStyle}></div>
             <div className="face right" style={cubeStyle}></div>
           </div>
@@ -211,15 +221,8 @@ const InfiniteCube = ({
         <div className="cube-shadow"></div>
       </div>
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10%",
-          width: "100%",
-          textAlign: "center",
-          zIndex: 30,
-        }}
-      >
+      {/* UI Controls (Result + Buttons) */}
+      <div className="controls-container">
         {showResult && (
           <div className="winner-text" style={resultStyle}>
             {winner ? `Result: ${winner}` : "..."}

@@ -2,25 +2,20 @@
    1. The 3D Scene & Environment
    ========================================= */
 
-/* UPDATED SCENE:
-   - Uses Flexbox to perfectly center the cube.
-   - Defaults to 100% size of its parent.
-*/
+/* The Scene now uses Flexbox to center the cube inside whatever container you put it in */
 .scene {
   width: 100%;
   height: 100%;
   perspective: 1000px;
   position: relative;
   transform-style: preserve-3d;
-  
-  /* Centering Magic */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* The Background Light Pillar */
-/* Note: We removed the hardcoded sizing here to let JS handle it */
+/* We removed fixed sizes here so JS can control them via props */
 .light-pillar {
   position: absolute;
   left: 50%;
@@ -43,9 +38,8 @@
   transform: translate(-50%, -50%) rotateX(90deg) translateZ(-128px);
   filter: blur(15px);
   z-index: 2;
-  
-  /* Ensure shadow stays centered regardless of pillar */
-  margin-top: 130px; /* Offset to sit below the cube */
+  /* Push shadow down so it sits below the cube */
+  margin-top: 130px; 
 }
 
 /* =========================================
@@ -53,7 +47,7 @@
    ========================================= */
 
 .cube-wrapper {
-  width: 200px; /* Fixed width prevents layout shifting */
+  width: 200px; 
   height: 200px;
   position: relative;
   transform-style: preserve-3d;
@@ -65,7 +59,6 @@
   transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0) !important;
 }
 
-/* The Inner Cube */
 .cube {
   width: 100%;
   height: 100%;
@@ -122,16 +115,25 @@
 }
 
 /* =========================================
-   5. UI Controls
+   5. UI Controls (Winner Text & Buttons)
    ========================================= */
+
+/* The container for buttons and text */
+.controls-container {
+  position: absolute;
+  bottom: 10%;
+  width: 100%;
+  text-align: center;
+  z-index: 30;
+  pointer-events: none; /* Let clicks pass through empty areas */
+}
 
 .controls {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 20px;
-  position: relative;
-  z-index: 20;
+  pointer-events: auto; /* Re-enable clicks on buttons */
 }
 
 .winner-text {
@@ -142,7 +144,6 @@
   text-shadow: 0 0 15px rgba(0, 219, 70, 0.95);
   min-height: 50px;
   letter-spacing: 1px;
-  text-align: center;
 }
 
 .cyber-button {
@@ -158,6 +159,7 @@
   box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
   transition: all 0.2s ease;
   outline: none;
+  pointer-events: auto;
 }
 
 .cyber-button:hover:not(:disabled) {
