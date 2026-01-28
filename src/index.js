@@ -2,31 +2,68 @@ import React, { useState, useRef, useEffect } from "react";
 import "./styles.css";
 
 const DEMO_ITEMS = [
-  { content: "1", color: "#00f7ff" },
-  { content: "2", color: "#00db46" },
-  { content: "3", color: "#ff00e6" },
-  { content: "4", color: "#ffbd00" },
+  { content: "🔥", color: "#ff4d4d" },
+  { content: "💧", color: "#4d94ff" },
+  { content: "🌿", color: "#4dff88" },
+  { content: "⚡", color: "#ffff4d" },
 ];
 
-const InfiniteCube = ({
-  items = DEMO_ITEMS,
-  onWinner,
-  perspective = "1000px",
-  initialSpeed = 30,
-  friction = 0.98,
-  showResult = true,
-  resultStyle = {},
-  cubeStyle = {},
+const InfiniteCube = (props) => {
+  // --- MASTER TOGGLE: Are we in "Panel Mode"? ---
+  const { enablePanel = false } = props;
 
-  // --- ENVIRONMENT PROPS ---
-  showPillar = true,
-  pillarColor = "rgba(0, 247, 255, 0.1)", // Default cyan tint
-  pillarSize = { width: "120px", height: "2000px" }, // Default massive beam
-  rootStyle = {}, // Allows user to set background image here
-}) => {
+  // If panel is enabled, we use INTERNAL state.
+  // If panel is disabled, we use PROPS.
+
+  // Initialize internal state with props or defaults
+  const [internalConfig, setInternalConfig] = useState({
+    items: props.items || DEMO_ITEMS,
+    initialSpeed: props.initialSpeed || 30,
+    friction: props.friction || 0.98,
+    perspective: props.perspective || "1000px",
+    showPillar: props.showPillar !== false, // default true
+    pillarColor: props.pillarColor || "rgba(0, 247, 255, 0.1)",
+    showResult: props.showResult !== false, // default true
+    cubeBorderWidth: 2,
+    bgImage: null,
+  });
+
+  // Decide which source of truth to use
+  const activeItems = enablePanel
+    ? internalConfig.items
+    : props.items || DEMO_ITEMS;
+  const activeSpeed = enablePanel
+    ? internalConfig.initialSpeed
+    : props.initialSpeed || 30;
+  const activeFriction = enablePanel
+    ? internalConfig.friction
+    : props.friction || 0.98;
+  const activePerspective = enablePanel
+    ? internalConfig.perspective
+    : props.perspective || "1000px";
+  const activeShowPillar = enablePanel
+    ? internalConfig.showPillar
+    : props.showPillar !== false;
+  const activePillarColor = enablePanel
+    ? internalConfig.pillarColor
+    : props.pillarColor || "rgba(0, 247, 255, 0.1)";
+  const activeShowResult = enablePanel
+    ? internalConfig.showResult
+    : props.showResult !== false;
+
+  // Styles
+  const activeCubeStyle = enablePanel
+    ? { borderWidth: `${internalConfig.cubeBorderWidth}px` }
+    : props.cubeStyle || {};
+
+  const activeBg =
+    enablePanel && internalConfig.bgImage
+      ? `url(${internalConfig.bgImage})`
+      : undefined;
+
+  // --- ENGINE STATE ---
   const [status, setStatus] = useState("idle");
   const [winner, setWinner] = useState(null);
-
   const [driftStyle, setDriftStyle] = useState({
     transform: "translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0)",
   });
@@ -34,61 +71,42 @@ const InfiniteCube = ({
   const cubeRef = useRef(null);
   const faceRefs = useRef([]);
   const animationRef = useRef(null);
-
   const rotationRef = useRef(0);
   const speedRef = useRef(0);
   const listPointerRef = useRef(0);
   const statusRef = useRef("idle");
-
   const MIN_CRAWL_SPEED = 0.5;
 
-  // --- Helper: Normalize Item Data ---
+  // --- LOGIC ---
   const getItemData = (index) => {
-    const rawItem = items[index % items.length];
-    if (typeof rawItem === "string") {
+    const rawItem = activeItems[index % activeItems.length];
+    if (typeof rawItem === "string")
       return { content: rawItem, color: "#00db46" };
-    }
-    return {
-      content: rawItem.content,
-      color: rawItem.color || "#00db46",
-    };
+    return { content: rawItem.content, color: rawItem.color || "#00db46" };
   };
 
   useEffect(() => {
     return () => cancelAnimationFrame(animationRef.current);
   }, []);
-
   useEffect(() => {
     updateFaceContent(0);
-  }, [items]);
+  }, [activeItems]);
 
-  // --- Random Float Logic (Drift) ---
   useEffect(() => {
     let timeoutId;
     const floatRandomly = () => {
       if (statusRef.current !== "idle") return;
-
       const rX = (Math.random() - 0.5) * 30;
       const rY = (Math.random() - 0.5) * 30;
       const rZ = (Math.random() - 0.5) * 10;
       const tY = (Math.random() - 0.5) * 30 - 5;
-
       setDriftStyle({
         transform: `translate3d(0px, ${tY}px, 0px) rotateX(${rX}deg) rotateY(${rY}deg) rotateZ(${rZ}deg)`,
       });
-
-      const nextMoveTime = 4000 + Math.random() * 1000;
-      timeoutId = setTimeout(floatRandomly, nextMoveTime);
+      timeoutId = setTimeout(floatRandomly, 4000 + Math.random() * 1000);
     };
-
-    if (status === "idle") {
-      floatRandomly();
-    } else {
-      clearTimeout(timeoutId);
-      setDriftStyle({
-        transform: "translate3d(0,0,0) rotateX(0) rotateY(0) rotateZ(0)",
-      });
-    }
+    if (status === "idle") floatRandomly();
+    else clearTimeout(timeoutId);
     return () => clearTimeout(timeoutId);
   }, [status]);
 
@@ -97,7 +115,7 @@ const InfiniteCube = ({
     setWinner(null);
     setStatus("spinning");
     statusRef.current = "spinning";
-    speedRef.current = initialSpeed;
+    speedRef.current = activeSpeed;
     listPointerRef.current = 0;
     rotationRef.current = 0;
     updateFaceContent(0);
@@ -113,25 +131,18 @@ const InfiniteCube = ({
 
   const loop = () => {
     rotationRef.current += speedRef.current;
-
-    // Treadmill Logic: Keep rotation between 0-90 visually, but swap content
     if (rotationRef.current >= 90) {
       rotationRef.current %= 90;
-      listPointerRef.current = (listPointerRef.current + 1) % items.length;
+      listPointerRef.current =
+        (listPointerRef.current + 1) % activeItems.length;
       updateFaceContent(listPointerRef.current);
     }
-
-    if (cubeRef.current) {
+    if (cubeRef.current)
       cubeRef.current.style.transform = `rotateX(${rotationRef.current}deg)`;
-    }
-
-    // Physics Engine
     if (statusRef.current === "stopping") {
-      speedRef.current *= friction;
+      speedRef.current *= activeFriction;
       if (speedRef.current < MIN_CRAWL_SPEED)
         speedRef.current = MIN_CRAWL_SPEED;
-
-      // Snap to stop
       if (speedRef.current <= MIN_CRAWL_SPEED && rotationRef.current < 1.0) {
         finishGame();
         return;
@@ -142,13 +153,11 @@ const InfiniteCube = ({
 
   const updateFaceContent = (startIndex) => {
     for (let i = 0; i < 4; i++) {
-      const itemIndex = (startIndex + i) % items.length;
+      const itemIndex = (startIndex + i) % activeItems.length;
       const data = getItemData(itemIndex);
       const el = faceRefs.current[i];
-
       if (el) {
         el.innerText = data.content;
-        // Apply dynamic color from the item object
         el.style.borderColor = data.color;
         el.style.boxShadow = `0 0 15px ${data.color}4d, inset 0 0 30px ${data.color}1a`;
         el.style.textShadow = `0 0 20px ${data.color}`;
@@ -162,90 +171,231 @@ const InfiniteCube = ({
     setStatus("idle");
     statusRef.current = "idle";
     setWinner(winningData.content);
-    if (onWinner) onWinner(winningData.content);
+    if (props.onWinner) props.onWinner(winningData.content);
   };
 
+  // --- PANEL HANDLERS ---
+  const updateConfig = (key, val) =>
+    setInternalConfig((prev) => ({ ...prev, [key]: val }));
+
+  const handleBgUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) updateConfig("bgImage", URL.createObjectURL(file));
+  };
+
+  const handleItemEdit = (idx, field, val) => {
+    const newItems = [...internalConfig.items];
+    newItems[idx] = { ...newItems[idx], [field]: val };
+    updateConfig("items", newItems);
+  };
+
+  const addItem = () =>
+    updateConfig("items", [
+      ...internalConfig.items,
+      { content: "?", color: "#fff" },
+    ]);
+  const removeItem = () => {
+    if (internalConfig.items.length > 2)
+      updateConfig("items", internalConfig.items.slice(0, -1));
+  };
+
+  // --- RENDER ---
   return (
-    <div
-      style={{
-        position: "relative",
-        zIndex: 10,
-        width: "100%",
-        height: "100%" /* Fills the parent container */,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        ...rootStyle,
-      }}
-    >
-      <div className="scene" style={{ perspective }}>
-        {/* Configurable Light Pillar */}
-        {showPillar && (
-          <div
-            className="light-pillar"
-            style={{
-              width: pillarSize.width,
-              height: pillarSize.height,
-              background: `linear-gradient(to bottom, transparent 0%, ${pillarColor} 50%, transparent 100%)`,
-            }}
-          ></div>
-        )}
+    <div className="rhc-container" style={props.rootStyle}>
+      {/* 1. THE STAGE (Always Visible) */}
+      <div className="rhc-stage" style={{ backgroundImage: activeBg }}>
+        <div className="scene" style={{ perspective: activePerspective }}>
+          {activeShowPillar && (
+            <div
+              className="light-pillar"
+              style={{
+                width: props.pillarSize?.width || "120px",
+                height: props.pillarSize?.height || "2000px",
+                background: `linear-gradient(to bottom, transparent 0%, ${activePillarColor} 50%, transparent 100%)`,
+              }}
+            ></div>
+          )}
 
-        {/* Floating Wrapper */}
-        <div
-          className={`cube-wrapper ${status !== "idle" ? "locked" : ""}`}
-          style={status === "idle" ? driftStyle : {}}
-        >
-          {/* Spinning Cube */}
           <div
-            ref={cubeRef}
-            className={`cube ${status !== "idle" ? "is-spinning" : ""}`}
-            style={{ transition: "none" }}
+            className={`cube-wrapper ${status !== "idle" ? "locked" : ""}`}
+            style={status === "idle" ? driftStyle : {}}
           >
-            {/* The 4 active faces */}
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`face ${["front", "bottom", "back", "top"][i]}`}
-                ref={(el) => (faceRefs.current[i] = el)}
-                style={cubeStyle}
-              ></div>
-            ))}
-            {/* The side caps */}
-            <div className="face left" style={cubeStyle}></div>
-            <div className="face right" style={cubeStyle}></div>
+            <div
+              ref={cubeRef}
+              className={`cube ${status !== "idle" ? "is-spinning" : ""}`}
+              style={{ transition: "none" }}
+            >
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`face ${["front", "bottom", "back", "top"][i]}`}
+                  ref={(el) => (faceRefs.current[i] = el)}
+                  style={activeCubeStyle}
+                ></div>
+              ))}
+              <div className="face left" style={activeCubeStyle}></div>
+              <div className="face right" style={activeCubeStyle}></div>
+            </div>
           </div>
+          <div className="cube-shadow"></div>
         </div>
 
-        <div className="cube-shadow"></div>
-      </div>
-
-      {/* UI Controls (Result + Buttons) */}
-      <div className="controls-container">
-        {showResult && (
-          <div className="winner-text" style={resultStyle}>
-            {winner ? `Result: ${winner}` : "..."}
+        <div className="rhc-overlay-controls">
+          {activeShowResult && (
+            <div className="winner-text" style={props.resultStyle}>
+              {winner ? `Result: ${winner}` : "..."}
+            </div>
+          )}
+          <div className="rhc-btn-group">
+            <button
+              className="cyber-button"
+              onClick={handleStart}
+              disabled={status !== "idle"}
+            >
+              Spin
+            </button>
+            <button
+              className="cyber-button stop-btn"
+              onClick={handleStop}
+              disabled={status !== "spinning"}
+            >
+              Stop
+            </button>
           </div>
-        )}
-
-        <div className="controls">
-          <button
-            className="cyber-button"
-            onClick={handleStart}
-            disabled={status !== "idle"}
-          >
-            Spin
-          </button>
-          <button
-            className="cyber-button stop-btn"
-            onClick={handleStop}
-            disabled={status !== "spinning"}
-          >
-            Stop
-          </button>
         </div>
       </div>
+
+      {/* 2. THE SIDEBAR (Only if enabled) */}
+      {enablePanel && (
+        <div className="rhc-sidebar">
+          <section>
+            <h2>Environment</h2>
+            <div className="rhc-control-group">
+              <label className="rhc-upload-btn">
+                {internalConfig.bgImage ? "Change Image" : "Upload Background"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBgUpload}
+                  style={{ display: "none" }}
+                />
+              </label>
+              <div className="rhc-row">
+                <label>Perspective</label>
+                <input
+                  type="range"
+                  min="500"
+                  max="2000"
+                  step="50"
+                  value={parseInt(internalConfig.perspective)}
+                  onChange={(e) =>
+                    updateConfig("perspective", `${e.target.value}px`)
+                  }
+                />
+              </div>
+              <div className="rhc-row">
+                <label>Show Pillar</label>
+                <input
+                  type="checkbox"
+                  checked={internalConfig.showPillar}
+                  onChange={(e) => updateConfig("showPillar", e.target.checked)}
+                />
+              </div>
+              <div className="rhc-row">
+                <label>Pillar Color</label>
+                <input
+                  type="color"
+                  value={internalConfig.pillarColor}
+                  onChange={(e) => updateConfig("pillarColor", e.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2>Physics</h2>
+            <div className="rhc-control-group">
+              <div className="rhc-row">
+                <label>Speed ({internalConfig.initialSpeed})</label>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  value={internalConfig.initialSpeed}
+                  onChange={(e) =>
+                    updateConfig("initialSpeed", Number(e.target.value))
+                  }
+                />
+              </div>
+              <div className="rhc-row">
+                <label>Friction ({internalConfig.friction})</label>
+                <input
+                  type="range"
+                  min="0.90"
+                  max="0.999"
+                  step="0.001"
+                  value={internalConfig.friction}
+                  onChange={(e) =>
+                    updateConfig("friction", Number(e.target.value))
+                  }
+                />
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2>Styling</h2>
+            <div className="rhc-control-group">
+              <div className="rhc-row">
+                <label>Border Width</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={internalConfig.cubeBorderWidth}
+                  onChange={(e) =>
+                    updateConfig("cubeBorderWidth", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2>Items</h2>
+            <div className="rhc-control-group">
+              {internalConfig.items.map((item, idx) => (
+                <div key={idx} className="rhc-item-row">
+                  <input
+                    type="text"
+                    value={item.content}
+                    maxLength={4}
+                    onChange={(e) =>
+                      handleItemEdit(idx, "content", e.target.value)
+                    }
+                    style={{ width: "60px", textAlign: "center" }}
+                  />
+                  <input
+                    type="color"
+                    value={item.color}
+                    onChange={(e) =>
+                      handleItemEdit(idx, "color", e.target.value)
+                    }
+                  />
+                </div>
+              ))}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button className="rhc-action-btn" onClick={addItem}>
+                  +
+                </button>
+                <button className="rhc-action-btn" onClick={removeItem}>
+                  -
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };

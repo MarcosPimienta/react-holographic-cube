@@ -1,21 +1,35 @@
 /* =========================================
-   1. The 3D Scene & Environment
+   1. The Scene & Layout
    ========================================= */
 
-/* The Scene now uses Flexbox to center the cube inside whatever container you put it in */
-.scene {
+/* The main container for the library */
+.rhc-container {
   width: 100%;
   height: 100%;
-  perspective: 1000px;
   position: relative;
-  transform-style: preserve-3d;
+  display: flex;
+  overflow: hidden;
+}
+
+/* The Stage (Where the cube lives) */
+.rhc-stage {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  background-size: cover;
+  background-position: center;
 }
 
-/* The Background Light Pillar */
-/* We removed fixed sizes here so JS can control them via props */
+/* =========================================
+   2. The Cube Logic
+   ========================================= */
+
 .light-pillar {
   position: absolute;
   left: 50%;
@@ -26,7 +40,6 @@
   z-index: 0;
 }
 
-/* The Shadow underneath the floating cube */
 .cube-shadow {
   position: absolute;
   width: 160px;
@@ -38,13 +51,8 @@
   transform: translate(-50%, -50%) rotateX(90deg) translateZ(-128px);
   filter: blur(15px);
   z-index: 2;
-  /* Push shadow down so it sits below the cube */
   margin-top: 130px; 
 }
-
-/* =========================================
-   2. The Cube & Wrapper
-   ========================================= */
 
 .cube-wrapper {
   width: 200px; 
@@ -70,7 +78,7 @@
 }
 
 /* =========================================
-   3. The Faces (Holographic Style)
+   3. The Faces
    ========================================= */
 
 .face {
@@ -91,17 +99,12 @@
   user-select: none;
 }
 
-/* Face Positions */
 .front  { transform: rotateX(0deg) translateZ(100px); }
 .bottom { transform: rotateX(-90deg) translateZ(100px); }
 .back   { transform: rotateX(-180deg) translateZ(100px); }
 .top    { transform: rotateX(-270deg) translateZ(100px); }
 .left   { transform: rotateY(-90deg) translateZ(100px); }
 .right  { transform: rotateY(90deg) translateZ(100px); }
-
-/* =========================================
-   4. High Energy Spin Effects
-   ========================================= */
 
 .cube.is-spinning .face {
   border-color: #afffd3;
@@ -115,25 +118,24 @@
 }
 
 /* =========================================
-   5. UI Controls (Winner Text & Buttons)
+   4. UI Controls (Buttons & Text)
    ========================================= */
 
-/* The container for buttons and text */
-.controls-container {
+.rhc-overlay-controls {
   position: absolute;
   bottom: 10%;
   width: 100%;
   text-align: center;
   z-index: 30;
-  pointer-events: none; /* Let clicks pass through empty areas */
+  pointer-events: none;
 }
 
-.controls {
+.rhc-btn-group {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 20px;
-  pointer-events: auto; /* Re-enable clicks on buttons */
+  pointer-events: auto;
 }
 
 .winner-text {
@@ -186,4 +188,117 @@
   background: #7f63f5;
   color: #fff;
   box-shadow: 0 0 25px rgba(127, 99, 245, 0.8);
+}
+
+/* =========================================
+   5. The Side Panel (New Feature)
+   ========================================= */
+
+.rhc-sidebar {
+  width: 320px;
+  background: #111116;
+  border-left: 1px solid #333;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 100;
+}
+
+.rhc-sidebar h2 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #00f7ff;
+  border-bottom: 1px solid #00f7ff;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.rhc-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.rhc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rhc-row label {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Panel Inputs */
+.rhc-sidebar input[type="range"] {
+  width: 60%;
+  accent-color: #00f7ff;
+}
+
+.rhc-sidebar input[type="text"], 
+.rhc-sidebar input[type="number"] {
+  background: #1a1a24;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+}
+
+.rhc-sidebar input[type="color"] {
+  background: none;
+  border: none;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.rhc-upload-btn {
+  border: 1px dashed #444;
+  padding: 15px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #aaa;
+  font-size: 12px;
+  display: block;
+}
+
+.rhc-upload-btn:hover {
+  border-color: #00f7ff;
+  color: #00f7ff;
+  background: rgba(0, 247, 255, 0.05);
+}
+
+.rhc-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: #1a1a24;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #333;
+}
+
+.rhc-action-btn {
+  flex: 1;
+  background: #222;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.rhc-action-btn:hover {
+  background: #333;
 }
