@@ -68,6 +68,8 @@ const InfiniteCube = (props) => {
       ? `url(${internalConfig.bgImage})`
       : undefined;
 
+  const activeBgColor = !activeBg ? "#000000" : undefined;
+
   // --- ENGINE STATE ---
   const [status, setStatus] = useState("idle");
   const [winner, setWinner] = useState(null);
@@ -251,7 +253,13 @@ const InfiniteCube = (props) => {
   return (
     <div className="rhc-container" style={props.rootStyle}>
       {/* 1. THE STAGE (Always Visible) */}
-      <div className="rhc-stage" style={{ backgroundImage: activeBg }}>
+      <div
+        className="rhc-stage"
+        style={{
+          backgroundImage: activeBg,
+          backgroundColor: activeBgColor,
+        }}
+      >
         <div className="scene" style={{ perspective: activePerspective }}>
           {activeShowPillar && (
             <div
