@@ -2,14 +2,16 @@
 
 A high-performance, cyberpunk-styled 3D spinning cube for React. Features physics-based friction, holographic visuals, and a floating drift animation when idle.
 
+Now supports **dynamic colors per item**, custom physics, and full style overrides!
+
 ![Holographic Cube Preview](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTVyamF6bjlsYjB5ZmdmbnlrY2RpNGtsYm9oZW0zNGN4eDZ1YmZmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IWt8NLETm6OLAnHE8C/giphy.gif)
 
 ## Features
 
-- **🕹️ Physics-Based:** Real momentum and friction (no pre-baked animations).
+- **🎨 Dynamic Item Colors:** Assign specific neon colors to individual items (e.g., Red for Fire, Blue for Water).
+- **🕹️ Physics Control:** Adjust `friction` and `initialSpeed` to control how long the spin lasts.
 - **🔮 Holographic Styling:** Glassy textures, neon borders, and "light pillar" effects.
 - **💨 Anti-Stutter:** Uses a "treadmill" logic to spin infinitely without visual glitches.
-- **🧊 Closed Geometry:** Fully 3D closed cube (including side caps).
 - **📱 Responsive:** Scales nicely within its container.
 
 ## Installation
